@@ -6,7 +6,7 @@ from time import sleep
 
 
 PALETTE_PADDING = 55
-PIXEL_PADDING = 22
+PIXEL_PADDING = 25
 
 
 pallete = {}
@@ -70,27 +70,26 @@ def fill(pos: Point, width: int, image: list[str]):
     row = 0
     for pixel in image:
         press('esc') # reset last pixel selection
-        sleep(0.2)
+        sleep(0.1)
 
         r, g, b = get_pixel_color(*current_pos)
         screen_pixel = f'#{r:02x}{g:02x}{b:02x}'
         move_to(current_pos)
 
         # print(f'it is {snap_to_palette(screen_pixel)}')
-        sleep(0.1)
 
         if _color_dist(screen_pixel, pixel) > 1200:
             set_color(pixel)
             print(f'fill ({current_pos[0]}, {current_pos[1]}) to {pixel} (was {screen_pixel})')
             click(current_pos)
-            sleep(0.3)
+            sleep(1)
 
             try:
-                # move_to(current_pos[0] + 200, current_pos[1] - 100)
+                # move_to(current_pos[0] + 50, current_pos[1] - 200)
                 # sleep(0.3)
-                # move_to(current_pos[0] + 350, current_pos[1] + 50)
+                # move_to(current_pos[0] + 300, current_pos[1] + 100)
 
-                cross = locate_on_screen('cross.png', region=(current_pos[0] + 150, current_pos[1] - 150, 300, 150), confidence=0.7, grayscale=True)
+                cross = locate_on_screen('cross.png', region=(current_pos[0] + 50, current_pos[1] - 200, 300, 300), confidence=0.7, grayscale=True)
                 assert cross #675 520  940 470
                 click(*cross) # close pixel info
 
@@ -98,7 +97,7 @@ def fill(pos: Point, width: int, image: list[str]):
                 print('no cross')
 
             finally:
-                sleep(0.1)
+                sleep(1)
                 click(1720, 780) # "ПОСТАВИТЬ"
                 print('set')
                 sleep(30)
