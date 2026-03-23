@@ -6,7 +6,6 @@ from time import sleep
 
 
 PALETTE_PADDING = 55
-PIXEL_PADDING = 25
 
 
 pallete = {}
@@ -35,17 +34,21 @@ def test_pallete():
         move_to(*point)
         sleep(0.1)
 
-def test_pixels(pos: Point):
+def test_pixels(pos: Point, padding: int):
     sleep(3)
     move_to(pos.x, pos.y)
     for i in range(0, 32):
-        move_to(pos.x + (i * PIXEL_PADDING))
+        move_to(pos.x + (i * padding))
         sleep(0.15)
 
     move_to(pos.x, pos.y)
     for i in range(0, 32):
-        move_to(y=pos.y + (i * PIXEL_PADDING))
+        move_to(y=pos.y + (i * padding))
         sleep(0.15)
+
+def calc_padding(width: int, left: Point, right: Point) -> int:
+    return (right.x - left.x) // width
+
 
 # euclid diff made by claude, i am not so clever
 def _color_dist(c1: str, c2: str) -> int:
@@ -63,11 +66,21 @@ def set_color(color: str):
     click(*pallete[color])
 
 
-def fill(pos: Point, width: int, image: list[str]):
+# def is_filled() -> bool:
+#     try:
+#         locate_on_screen('already_filled.png', region=(1571, 740, 296, 70))
+#         return True
+#     except ImageNotFoundException:
+#         return False
+
+
+def fill(pos: Point, width: int, image: list[str], accounts: list[Point], padding: int):
     sleep(3)
     move_to(pos.x, pos.y)
     current_pos = [pos.x, pos.y] # cant use Point cuz it is read only
     row = 0
+    account = accounts[0]
+
     for pixel in image:
         press('esc') # reset last pixel selection
         sleep(0.1)
@@ -82,7 +95,7 @@ def fill(pos: Point, width: int, image: list[str]):
             set_color(pixel)
             print(f'fill ({current_pos[0]}, {current_pos[1]}) to {pixel} (was {screen_pixel})')
             click(current_pos)
-            sleep(1)
+            sleep(0.5)
 
             try:
                 # move_to(current_pos[0] + 50, current_pos[1] - 200)
@@ -97,16 +110,19 @@ def fill(pos: Point, width: int, image: list[str]):
                 print('no cross')
 
             finally:
-                sleep(1)
+                sleep(0.5)
                 click(1720, 780) # "ПОСТАВИТЬ"
                 print('set')
-                sleep(30)
+                sleep(0.2)
+                account = accounts[accounts.index(account) - 1]
+                click(account)
+                sleep(30 / len(accounts))
         else:
             print(f'skip (pixel already {pixel})')
 
-        current_pos[0] += PIXEL_PADDING
+        current_pos[0] += padding
         row += 1
         if row == width:
             print('move down')
             row = 0
-            current_pos = [pos.x, current_pos[1] + PIXEL_PADDING]
+            current_pos = [pos.x, current_pos[1] + padding]
